@@ -53,6 +53,12 @@ int znajdzNajwiekszeIdUzytkownika(vector<Uzytkownik> uzytkownicy) {
     return najwiekszeId;
 }
 
+void wyczyscPlik(string nazwaPliku) {
+    fstream plik;
+    plik.open(nazwaPliku,ios::out | ios::trunc);
+    plik.close();
+}
+
 void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik, string nazwaPliku) {
     fstream plik;
     plik.open(nazwaPliku,ios::out | ios::app);
@@ -62,6 +68,16 @@ void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik, string nazwaPliku) {
          << uzytkownik.haslo << endl;
 
     plik.close();
+}
+
+void aktualizujPlikUzytkownikow(vector<Uzytkownik> uzytkownicy, string nazwaPliku) {
+    vector<Uzytkownik>::iterator koncowyIterator = uzytkownicy.end();
+    vector<Uzytkownik>::iterator itr = uzytkownicy.begin();
+
+    wyczyscPlik(nazwaPliku);
+
+    for(itr; itr != koncowyIterator; ++itr)
+        zapiszUzytkownikaDoPliku(*itr, nazwaPliku);
 }
 
 void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy, string nazwaPliku) {
@@ -126,7 +142,7 @@ int logowanie(vector<Uzytkownik> &uzytkownicy) {
     return 0;
 }
 
-void zmienHaslo(vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika) {
+void zmienHaslo(vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika, string nazwaPliku) {
     string noweHaslo;
 
     system("cls");
@@ -140,6 +156,7 @@ void zmienHaslo(vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika) 
         if(iteratorUzytkownika->idUzytkownika == idZalogowanegoUzytkownika)
             iteratorUzytkownika->haslo = noweHaslo;
 
+    aktualizujPlikUzytkownikow(uzytkownicy, nazwaPliku);
     wyswietlKomunikat("Haslo pomyslnie zmienione!");
 }
 
@@ -235,13 +252,7 @@ void zapiszAdresataDoPliku(Adresat adresat, string nazwaPliku) {
     plik.close();
 }
 
-void wyczyscPlik(string nazwaPliku) {
-    fstream plik;
-    plik.open(nazwaPliku,ios::out | ios::trunc);
-    plik.close();
-}
-
-void aktualizujPlik(vector<Adresat> adresaci, string nazwaPliku) {
+void aktualizujPlikAdresatow(vector<Adresat> adresaci, string nazwaPliku) {
     vector<Adresat>::iterator koncowyIterator = adresaci.end();
     vector<Adresat>::iterator itr = adresaci.begin();
 
@@ -251,6 +262,8 @@ void aktualizujPlik(vector<Adresat> adresaci, string nazwaPliku) {
         zapiszAdresataDoPliku(*itr,nazwaPliku);
 
 }
+
+
 
 void dodajAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
     system("cls");
@@ -427,7 +440,7 @@ void usunAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
 
 
     adresaci.erase(iteratorUsuwanegoAdresata);
-    aktualizujPlik(adresaci, nazwaPliku);
+    aktualizujPlikAdresatow(adresaci, nazwaPliku);
     wyswietlKomunikat("Adresat usuniety!");
 }
 
@@ -500,7 +513,7 @@ void edytujAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
         return;
     }
 
-    aktualizujPlik(adresaci, nazwaPliku);
+    aktualizujPlikAdresatow(adresaci, nazwaPliku);
     wyswietlKomunikat("Dane pomyslnie zmienione!");
 }
 
@@ -549,7 +562,7 @@ int main() {
             else if(wybor == '4') wyswietlWszystkichAdresatow(adresaci);
             else if(wybor == '5') usunAdresata(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
             else if(wybor == '6') edytujAdresata(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
-            else if(wybor == '7') zmienHaslo(uzytkownicy, idZalogowanegoUzytkownika);
+            else if(wybor == '7') zmienHaslo(uzytkownicy, idZalogowanegoUzytkownika, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
             else if(wybor == '9') idZalogowanegoUzytkownika = 0;
             else wyswietlKomunikat("Opcja nie istnieje!");
         }
