@@ -27,6 +27,32 @@ void wyswietlKomunikat(string komunikat) {
     Sleep(CZAS_WYSWIETLANIA_WIADOMOSCI);
 }
 
+int znajdzNajwiekszeId(vector<Adresat> adresaci) {
+    int najwiekszeId = 0;
+
+    vector<Adresat>::iterator koncowyIterator = adresaci.end();
+    vector<Adresat>::iterator itr = adresaci.begin();
+
+    for(itr; itr != koncowyIterator; ++itr)
+        if(itr->id > najwiekszeId)
+            najwiekszeId = itr->id;
+
+    return najwiekszeId;
+}
+
+int znajdzNajwiekszeIdUzytkownika(vector<Uzytkownik> uzytkownicy) {
+    int najwiekszeId = 0;
+
+    vector<Uzytkownik>::iterator koncowyIterator = uzytkownicy.end();
+    vector<Uzytkownik>::iterator itr = uzytkownicy.begin();
+
+    for(itr; itr != koncowyIterator; ++itr)
+        if(itr->idUzytkownika > najwiekszeId)
+            najwiekszeId = itr->idUzytkownika;
+
+    return najwiekszeId;
+}
+
 void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy) {
     Uzytkownik nowyUzytkownik;
 
@@ -48,9 +74,7 @@ void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy) {
 
     cout << "Podaj haslo: ";
     cin >> nowyUzytkownik.haslo;
-
-    //Tutaj znajdz max id uzytkownika
-    nowyUzytkownik.idUzytkownika++;
+    nowyUzytkownik.idUzytkownika = znajdzNajwiekszeIdUzytkownika(uzytkownicy) + 1;
 
     uzytkownicy.push_back(nowyUzytkownik);
 
@@ -107,9 +131,46 @@ void zmienHaslo(vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika) 
     wyswietlKomunikat("Haslo pomyslnie zmienione!");
 }
 
+void wczytajUzytkownikowZPliku(vector<Uzytkownik> &uzytkownicy, string nazwaPliku) {
+    fstream plik;
+    string wiersz, idUzytkownika, nazwaUzytkownika, haslo;
+    const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 5;
+
+    plik.open(nazwaPliku, ios::in);
+
+    if(plik.good()) {
+        while(!plik.eof()) {
+            getline(plik, wiersz, '\n');
+
+            if(wiersz.length() < MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA) break;
+
+            istringstream strumienWiersza(wiersz);
+
+            Uzytkownik wczytywanyUzytkownik;
+
+            getline(strumienWiersza,idUzytkownika, '|');
+            getline(strumienWiersza,nazwaUzytkownika, '|');
+            getline(strumienWiersza,haslo, '|');
+
+            wczytywanyUzytkownik.idUzytkownika = atoi(idUzytkownika.c_str());
+            wczytywanyUzytkownik.nazwaUzytkownika = nazwaUzytkownika;
+            wczytywanyUzytkownik.haslo = haslo;
+
+            uzytkownicy.push_back(wczytywanyUzytkownik);
+        }
+
+        plik.close();
+        return;
+    } else {
+        plik.close();
+        return;
+    }
+}
+
 void wczytajAdresatowZPliku(vector<Adresat> &adresaci, string nazwaPliku) {
     fstream plik;
     string wiersz, id, imie, nazwisko, numerTelefonu, email, adres;
+    const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 9;
 
     plik.open(nazwaPliku, ios::in);
 
@@ -179,18 +240,7 @@ void aktualizujPlik(vector<Adresat> adresaci, string nazwaPliku) {
 
 }
 
-int znajdzNajwiekszeId(vector<Adresat> adresaci) {
-    int najwiekszeId = 0;
 
-    vector<Adresat>::iterator koncowyIterator = adresaci.end();
-    vector<Adresat>::iterator itr = adresaci.begin();
-
-    for(itr; itr != koncowyIterator; ++itr)
-        if((*itr).id > najwiekszeId)
-            najwiekszeId = (*itr).id;
-
-    return najwiekszeId;
-}
 
 void dodajAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
     system("cls");
@@ -447,12 +497,14 @@ void edytujAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
 int main() {
     char wybor;
     int idZalogowanegoUzytkownika = 0;
-    const string NAZWA_PLIKU = "adresaci.txt";
+    const string NAZWA_PLIKU_Z_UZYTKOWNIKAMI = "uzytkownicy.txt";
+    const string NAZWA_PLIKU_Z_ADRESATAMI = "adresaci.txt";
 
     vector<Uzytkownik> uzytkownicy;
     vector<Adresat> adresaci;
 
-    wczytajAdresatowZPliku(adresaci, NAZWA_PLIKU);
+    wczytajUzytkownikowZPliku(uzytkownicy, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
+    wczytajAdresatowZPliku(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
 
     while(true) {
         system("cls");
@@ -481,12 +533,12 @@ int main() {
             cin.sync();
             cin >> wybor;
 
-            if(wybor == '1') dodajAdresata(adresaci, NAZWA_PLIKU);
+            if(wybor == '1') dodajAdresata(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
             else if(wybor == '2') wyswietlAdresatowOImieniu(adresaci);
             else if(wybor == '3') wyswietlAdresatowONazwisku(adresaci);
             else if(wybor == '4') wyswietlWszystkichAdresatow(adresaci);
-            else if(wybor == '5') usunAdresata(adresaci, NAZWA_PLIKU);
-            else if(wybor == '6') edytujAdresata(adresaci, NAZWA_PLIKU);
+            else if(wybor == '5') usunAdresata(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
+            else if(wybor == '6') edytujAdresata(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
             else if(wybor == '7') zmienHaslo(uzytkownicy, idZalogowanegoUzytkownika);
             else if(wybor == '9') idZalogowanegoUzytkownika = 0;
             else wyswietlKomunikat("Opcja nie istnieje!");
