@@ -10,48 +10,6 @@
 
 using namespace std;
 
-/*
-Plan main / menu:
-1. Utworz tablice osob adresaci[100] oraz int iloscAdresatow = 0;
-2. Jesli istnieje plik adresaci.txt wczytaj z niego dane do tablicy
-    i do iloscAdresatow wpisz ilosc zaladowanych osob.
-3.Wyswietl menu programu.
-
-Plan dodajAdresata(vector<Adresat> &adresaci, int &iloscAdresatow)
-1. W nowyAdresat Zapisz dane nowego adresata
-2. Wczytaj imie nazwisko itp.
-3. Nadaj osobie id rowne iloscAdresatow
-4. Zwieksz zmienna iloscAdresatow o 1
-
-Plan wyswietlWszystkichAdresatow(vector<Adresat> &adresaci, int iloscAdresatow)
-1. Wyczysc ekran
-2. w petli for przejdz po elementach adresaci[] tyle razy ile iloscAdresatow
-3. Wypisz kazda osobe: id tab Imie tab nazwisko tab itp. endl
-4. Zaczekaj na wcisniecie dowolnego klawisza
-
-Plan wyswietlAdresatowOImieniu(vector<Adresat> &adresaci, int iloscAdresatow, string imie)
-1. Wyczysc ekran
-2. w petli for przejdz po elementach adresaci[] tyle razy ile iloscAdresatow
-3. Wypisz kazda osobe, ktorej imie jest rowne imie.
-4. Zaczekaj na wcisniecie dowolnego klawisza
-
-Plan int wczytajAdresatowZPliku(vector<Adresat> &adresaci, string nazwaPliku)
-1. Otworz plik nazwaPliku w trybie odczytu.
-2. Jezeli nie istnieje zwroc 0
-    Jezeli plik istnieje to przejdz w petli po wszystkich liniach
-3. Wczytuj kazdy fragment do odpowiedniej zmiennej string. Dane sa oddzielone tabulatorami.
-4. Przypisz odczytane stringi do odpowiednich zmiennych w tablicy adresaci, konwertujac na odpowiedni typ.
-5. Co kazda odczytana linie zwiekszaj licznik iloscAdresatow.
-6. Zamknij plik.
-7. Zwroc iloscAdresatow.
-
-Plan void zapiszAdresatowDoPliku(Adresat adresat, string nazwaPliku)
-1. Otworz plik nazwaPliku w trybie dopisywania.
-2. Dopisz dane przekazanego adresata
-3. Zamknij plik.
-
-*/
-
 #define CZAS_WYSWIETLANIA_WIADOMOSCI 1500
 
 struct Adresat {
@@ -59,9 +17,94 @@ struct Adresat {
     string imie, nazwisko, numerTelefonu, email, adres;
 };
 
+struct Uzytkownik {
+    int idUzytkownika = 0;
+    string nazwaUzytkownika, haslo;
+};
+
 void wyswietlKomunikat(string komunikat) {
     cout << komunikat;
     Sleep(CZAS_WYSWIETLANIA_WIADOMOSCI);
+}
+
+void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy) {
+    Uzytkownik nowyUzytkownik;
+
+    system("cls");
+    cout << "Podaj nazwe uzytkownika: ";
+    cin >> nowyUzytkownik.nazwaUzytkownika;
+
+    vector<Uzytkownik>::iterator iteratorUzytkownika = uzytkownicy.begin();
+    vector<Uzytkownik>::iterator iteratorKoncowy = uzytkownicy.end();
+
+    while(iteratorUzytkownika != iteratorKoncowy) {
+        if(iteratorUzytkownika->nazwaUzytkownika == nowyUzytkownik.nazwaUzytkownika) {
+            cout << "Taki uzytkownik juz istnieje! Wpisz inna nazwe uzytkownika: ";
+            cin >> nowyUzytkownik.nazwaUzytkownika;
+            iteratorUzytkownika = uzytkownicy.begin();
+        } else
+            ++iteratorUzytkownika;
+    }
+
+    cout << "Podaj haslo: ";
+    cin >> nowyUzytkownik.haslo;
+
+    //Tutaj znajdz max id uzytkownika
+    nowyUzytkownik.idUzytkownika++;
+
+    uzytkownicy.push_back(nowyUzytkownik);
+
+    wyswietlKomunikat("Konto zalozone!");
+}
+
+int logowanie(vector<Uzytkownik> &uzytkownicy) {
+    Uzytkownik logowanyUzytkownik;
+    const int ILOSC_PROB = 3;
+
+    system("cls");
+
+    cout << "Podaj nazwe uzytkownika: ";
+    cin >> logowanyUzytkownik.nazwaUzytkownika;
+
+    vector<Uzytkownik>::iterator iteratorUzytkownika = uzytkownicy.begin();
+    vector<Uzytkownik>::iterator iteratorKoncowy = uzytkownicy.end();
+
+    while(iteratorUzytkownika != iteratorKoncowy) {
+        if(iteratorUzytkownika->nazwaUzytkownika == logowanyUzytkownik.nazwaUzytkownika) {
+            for(int i = 0; i < ILOSC_PROB; i++) {
+                cout << "Podaj haslo. Pozostalo prob " << ILOSC_PROB - i << ": ";
+                cin >> logowanyUzytkownik.haslo;
+                if(logowanyUzytkownik.haslo == iteratorUzytkownika->haslo) {
+                    cout << "Zalogowales sie!";
+                    return iteratorUzytkownika->idUzytkownika;
+                }
+            }
+            cout << "Podales 3 razy bledne haslo. Program zablokowany na 3 sekundy!";
+            Sleep(3000);
+            return 0;
+        } else
+            ++iteratorUzytkownika;
+    }
+
+    wyswietlKomunikat("Nie udalo sie zalogowac.");
+    return 0;
+}
+
+void zmienHaslo(vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika) {
+    string noweHaslo;
+
+    system("cls");
+    cout << "Podaj nowe haslo: ";
+    cin >> noweHaslo;
+
+    vector<Uzytkownik>::iterator iteratorUzytkownika = uzytkownicy.begin();
+    vector<Uzytkownik>::iterator iteratorKoncowy = uzytkownicy.end();
+
+    for(iteratorUzytkownika; iteratorUzytkownika != iteratorKoncowy; ++iteratorUzytkownika)
+        if(iteratorUzytkownika->idUzytkownika == idZalogowanegoUzytkownika)
+            iteratorUzytkownika->haslo = noweHaslo;
+
+    wyswietlKomunikat("Haslo pomyslnie zmienione!");
 }
 
 void wczytajAdresatowZPliku(vector<Adresat> &adresaci, string nazwaPliku) {
@@ -403,58 +446,50 @@ void edytujAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
 
 int main() {
     char wybor;
+    int idZalogowanegoUzytkownika = 0;
     const string NAZWA_PLIKU = "adresaci.txt";
 
+    vector<Uzytkownik> uzytkownicy;
     vector<Adresat> adresaci;
 
     wczytajAdresatowZPliku(adresaci, NAZWA_PLIKU);
 
-    for(;;) {
+    while(true) {
         system("cls");
-        cout << "KSIAZKA ADRESOWA\n"
-             << "1. Dodaj adresata\n"
-             << "2. Wyszukaj po imieniu\n"
-             << "3. Wyszukaj po nazwisku\n"
-             << "4. Wyswietl wszystkich adresatow\n"
-             << "5. Usun adresata\n"
-             << "6. Edytuj adresata\n"
-             << "9. Zakoncz program\n"
-             << "Twoj wybor: ";
+        if(idZalogowanegoUzytkownika == 0) {
+            cout << "1. Rejestracja\n"
+                 << "2. Logowanie\n"
+                 << "9. Zakoncz program\n";
+            cin >> wybor;
 
-        cin.sync();
-        cin >> wybor;
+            if(wybor == '1') stworzNowegoUzytkownika(uzytkownicy);
+            else if(wybor == '2') idZalogowanegoUzytkownika = logowanie(uzytkownicy);
+            else exit(0);
+        } else {
 
-        switch(wybor) {
+            cout << "KSIAZKA ADRESOWA\n"
+                 << "1. Dodaj adresata\n"
+                 << "2. Wyszukaj po imieniu\n"
+                 << "3. Wyszukaj po nazwisku\n"
+                 << "4. Wyswietl wszystkich adresatow\n"
+                 << "5. Usun adresata\n"
+                 << "6. Edytuj adresata\n"
+                 << "7. Zmien haslo\n"
+                 << "9. Wyloguj\n"
+                 << "Twoj wybor: ";
 
-        case '1':
-            dodajAdresata(adresaci, NAZWA_PLIKU);
-            break;
+            cin.sync();
+            cin >> wybor;
 
-        case '2':
-            wyswietlAdresatowOImieniu(adresaci);
-            break;
-
-        case '3':
-            wyswietlAdresatowONazwisku(adresaci);
-            break;
-
-        case '4':
-            wyswietlWszystkichAdresatow(adresaci);
-            break;
-
-        case '5':
-            usunAdresata(adresaci, NAZWA_PLIKU);
-            break;
-        case '6':
-            edytujAdresata(adresaci, NAZWA_PLIKU);
-            break;
-        case '9':
-            exit(0);
-            break;
-
-        default:
-            wyswietlKomunikat("Opcja nie istnieje!");
-            break;
+            if(wybor == '1') dodajAdresata(adresaci, NAZWA_PLIKU);
+            else if(wybor == '2') wyswietlAdresatowOImieniu(adresaci);
+            else if(wybor == '3') wyswietlAdresatowONazwisku(adresaci);
+            else if(wybor == '4') wyswietlWszystkichAdresatow(adresaci);
+            else if(wybor == '5') usunAdresata(adresaci, NAZWA_PLIKU);
+            else if(wybor == '6') edytujAdresata(adresaci, NAZWA_PLIKU);
+            else if(wybor == '7') zmienHaslo(uzytkownicy, idZalogowanegoUzytkownika);
+            else if(wybor == '9') idZalogowanegoUzytkownika = 0;
+            else wyswietlKomunikat("Opcja nie istnieje!");
         }
     }
     return 0;
