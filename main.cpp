@@ -53,7 +53,18 @@ int znajdzNajwiekszeIdUzytkownika(vector<Uzytkownik> uzytkownicy) {
     return najwiekszeId;
 }
 
-void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy) {
+void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik, string nazwaPliku) {
+    fstream plik;
+    plik.open(nazwaPliku,ios::out | ios::app);
+
+    plik << uzytkownik.idUzytkownika << '|'
+         << uzytkownik.nazwaUzytkownika << '|'
+         << uzytkownik.haslo << endl;
+
+    plik.close();
+}
+
+void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy, string nazwaPliku) {
     Uzytkownik nowyUzytkownik;
 
     system("cls");
@@ -77,6 +88,7 @@ void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy) {
     nowyUzytkownik.idUzytkownika = znajdzNajwiekszeIdUzytkownika(uzytkownicy) + 1;
 
     uzytkownicy.push_back(nowyUzytkownik);
+    zapiszUzytkownikaDoPliku(nowyUzytkownik, nazwaPliku);
 
     wyswietlKomunikat("Konto zalozone!");
 }
@@ -150,7 +162,7 @@ void wczytajUzytkownikowZPliku(vector<Uzytkownik> &uzytkownicy, string nazwaPlik
 
             getline(strumienWiersza,idUzytkownika, '|');
             getline(strumienWiersza,nazwaUzytkownika, '|');
-            getline(strumienWiersza,haslo, '|');
+            getline(strumienWiersza,haslo);
 
             wczytywanyUzytkownik.idUzytkownika = atoi(idUzytkownika.c_str());
             wczytywanyUzytkownik.nazwaUzytkownika = nazwaUzytkownika;
@@ -239,8 +251,6 @@ void aktualizujPlik(vector<Adresat> adresaci, string nazwaPliku) {
         zapiszAdresataDoPliku(*itr,nazwaPliku);
 
 }
-
-
 
 void dodajAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
     system("cls");
@@ -514,7 +524,7 @@ int main() {
                  << "9. Zakoncz program\n";
             cin >> wybor;
 
-            if(wybor == '1') stworzNowegoUzytkownika(uzytkownicy);
+            if(wybor == '1') stworzNowegoUzytkownika(uzytkownicy, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
             else if(wybor == '2') idZalogowanegoUzytkownika = logowanie(uzytkownicy);
             else exit(0);
         } else {
