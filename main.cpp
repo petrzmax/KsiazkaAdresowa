@@ -10,10 +10,15 @@
 
 using namespace std;
 
+/*
+To do
+- Edycja danych - aktualizacja plikow
+*/
+
 #define CZAS_WYSWIETLANIA_WIADOMOSCI 1500
 
 struct Adresat {
-    int id = 0;
+    int id = 0, idWlascicielaWpisu = 0;;
     string imie, nazwisko, numerTelefonu, email, adres;
 };
 
@@ -196,9 +201,9 @@ void wczytajUzytkownikowZPliku(vector<Uzytkownik> &uzytkownicy, string nazwaPlik
     }
 }
 
-void wczytajAdresatowZPliku(vector<Adresat> &adresaci, string nazwaPliku) {
+void wczytajAdresatowZPliku(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika, string nazwaPliku) {
     fstream plik;
-    string wiersz, id, imie, nazwisko, numerTelefonu, email, adres;
+    string wiersz, id, idWlascicielaWpisu, imie, nazwisko, numerTelefonu, email, adres;
     const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 9;
 
     plik.open(nazwaPliku, ios::in);
@@ -214,6 +219,7 @@ void wczytajAdresatowZPliku(vector<Adresat> &adresaci, string nazwaPliku) {
             Adresat wczytywanyAdresat;
 
             getline(strumienWiersza,id, '|');
+            getline(strumienWiersza,idWlascicielaWpisu, '|');
             getline(strumienWiersza,imie, '|');
             getline(strumienWiersza,nazwisko, '|');
             getline(strumienWiersza,numerTelefonu, '|');
@@ -221,13 +227,15 @@ void wczytajAdresatowZPliku(vector<Adresat> &adresaci, string nazwaPliku) {
             getline(strumienWiersza,adres, '|');
 
             wczytywanyAdresat.id = atoi(id.c_str());
+            wczytywanyAdresat.idWlascicielaWpisu = atoi(idWlascicielaWpisu.c_str());
             wczytywanyAdresat.imie = imie;
             wczytywanyAdresat.nazwisko = nazwisko;
             wczytywanyAdresat.numerTelefonu = numerTelefonu;
             wczytywanyAdresat.email = email;
             wczytywanyAdresat.adres = adres;
 
-            adresaci.push_back(wczytywanyAdresat);
+            if(wczytywanyAdresat.idWlascicielaWpisu == idZalogowanegoUzytkownika)
+                adresaci.push_back(wczytywanyAdresat);
         }
 
         plik.close();
@@ -243,6 +251,7 @@ void zapiszAdresataDoPliku(Adresat adresat, string nazwaPliku) {
     plik.open(nazwaPliku,ios::out | ios::app);
 
     plik << adresat.id << '|'
+         << adresat.idWlascicielaWpisu << '|'
          << adresat.imie << '|'
          << adresat.nazwisko << '|'
          << adresat.numerTelefonu << '|'
@@ -259,17 +268,15 @@ void aktualizujPlikAdresatow(vector<Adresat> adresaci, string nazwaPliku) {
     wyczyscPlik(nazwaPliku);
 
     for(itr; itr != koncowyIterator; ++itr)
-        zapiszAdresataDoPliku(*itr,nazwaPliku);
-
+        zapiszAdresataDoPliku(*itr, nazwaPliku);
 }
 
-
-
-void dodajAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
+void dodajAdresata(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika, string nazwaPliku) {
     system("cls");
 
     Adresat nowyAdresat;
     nowyAdresat.id = znajdzNajwiekszeId(adresaci)+1;
+    nowyAdresat.idWlascicielaWpisu = idZalogowanegoUzytkownika;
 
     cout << "Imie: ";
     cin >> nowyAdresat.imie;
@@ -444,7 +451,6 @@ void usunAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
     wyswietlKomunikat("Adresat usuniety!");
 }
 
-
 void edytujAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
     char wybor;
     int idAdresataDoEdycji;
@@ -527,7 +533,7 @@ int main() {
     vector<Adresat> adresaci;
 
     wczytajUzytkownikowZPliku(uzytkownicy, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
-    wczytajAdresatowZPliku(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
+
 
     while(true) {
         system("cls");
@@ -538,7 +544,11 @@ int main() {
             cin >> wybor;
 
             if(wybor == '1') stworzNowegoUzytkownika(uzytkownicy, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
-            else if(wybor == '2') idZalogowanegoUzytkownika = logowanie(uzytkownicy);
+            else if(wybor == '2') {
+                idZalogowanegoUzytkownika = logowanie(uzytkownicy);
+                if(idZalogowanegoUzytkownika > 0)
+                    wczytajAdresatowZPliku(adresaci, idZalogowanegoUzytkownika, NAZWA_PLIKU_Z_ADRESATAMI);
+            }
             else exit(0);
         } else {
 
@@ -556,14 +566,17 @@ int main() {
             cin.sync();
             cin >> wybor;
 
-            if(wybor == '1') dodajAdresata(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
+            if(wybor == '1') dodajAdresata(adresaci, idZalogowanegoUzytkownika, NAZWA_PLIKU_Z_ADRESATAMI);
             else if(wybor == '2') wyswietlAdresatowOImieniu(adresaci);
             else if(wybor == '3') wyswietlAdresatowONazwisku(adresaci);
             else if(wybor == '4') wyswietlWszystkichAdresatow(adresaci);
             else if(wybor == '5') usunAdresata(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
             else if(wybor == '6') edytujAdresata(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
             else if(wybor == '7') zmienHaslo(uzytkownicy, idZalogowanegoUzytkownika, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
-            else if(wybor == '9') idZalogowanegoUzytkownika = 0;
+            else if(wybor == '9') {
+                idZalogowanegoUzytkownika = 0;
+                adresaci.clear();
+            }
             else wyswietlKomunikat("Opcja nie istnieje!");
         }
     }
