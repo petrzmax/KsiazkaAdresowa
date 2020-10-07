@@ -11,8 +11,6 @@
 using namespace std;
 
 /*
-To do
-- usuwanie adresata - aktualizacja pliku
 
 Blad:
 id adresata max jest szukane w pamieci, a w pamieci nie ma teraz zaladowanych wszystkich uzytkownikow.
@@ -269,18 +267,20 @@ void zapiszAdresataDoPliku(Adresat adresat, string nazwaPliku) {
 
 void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata, string nazwaPliku) {
 
+    fstream plikWejscia, plikWyjscia;
+    bool usuwanie = false;
+    string wiersz, idAdresata;
+
+    const string NAZWA_PLIKU_TYMCZASOWEGO = "adresaci_tymczasowy.txt";
+
     vector<Adresat>::iterator koncowyIterator = adresaci.end();
     vector<Adresat>::iterator itr = adresaci.begin();
 
     for(itr; itr != koncowyIterator; ++itr)
         if(itr->id == idEdytowanegoAdresata) break;
 
+    if(itr == koncowyIterator) usuwanie = true;
 
-    fstream plikWejscia, plikWyjscia;
-    string wiersz, idAdresata;
-    string wierszZEdytowanymiDanymi = "3|2|Karol|Kaminski|234876453|karolek@gmail.com|Bogaty dom|";
-
-    const string NAZWA_PLIKU_TYMCZASOWEGO = "adresaci_tymczasowy.txt";
 
     plikWejscia.open(nazwaPliku, ios::in);
     plikWyjscia.open(NAZWA_PLIKU_TYMCZASOWEGO, ios::out);
@@ -295,14 +295,16 @@ void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata
             getline(strumienWiersza, idAdresata, '|');
 
             if(atoi(idAdresata.c_str()) == idEdytowanegoAdresata) {
-                plikWyjscia << itr->id << '|'
-                            << itr->idUzytkownika << '|'
-                            << itr->imie << '|'
-                            << itr->nazwisko << '|'
-                            << itr->numerTelefonu << '|'
-                            << itr->email << '|'
-                            << itr->adres << '|' << endl;
-
+                if(usuwanie) continue;
+                else {
+                    plikWyjscia << itr->id << '|'
+                                << itr->idUzytkownika << '|'
+                                << itr->imie << '|'
+                                << itr->nazwisko << '|'
+                                << itr->numerTelefonu << '|'
+                                << itr->email << '|'
+                                << itr->adres << '|' << endl;
+                }
             } else plikWyjscia << wiersz << endl;
         }
 
@@ -486,7 +488,6 @@ void usunAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
             break;
         }
     } while (wybor != 't');
-
 
     adresaci.erase(iteratorUsuwanegoAdresata);
     aktualizujPlikAdresatow(adresaci, idOsobyDoUsuniecia, nazwaPliku);
