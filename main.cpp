@@ -12,7 +12,7 @@ using namespace std;
 
 /*
 To do
-- Edycja danych - aktualizuj plik adresatow
+- usuwanie adresata - aktualizacja pliku
 
 Blad:
 id adresata max jest szukane w pamieci, a w pamieci nie ma teraz zaladowanych wszystkich uzytkownikow.
@@ -267,14 +267,50 @@ void zapiszAdresataDoPliku(Adresat adresat, string nazwaPliku) {
     plik.close();
 }
 
-void aktualizujPlikAdresatow(vector<Adresat> adresaci, string nazwaPliku) {
+void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata, string nazwaPliku) {
+
     vector<Adresat>::iterator koncowyIterator = adresaci.end();
     vector<Adresat>::iterator itr = adresaci.begin();
 
-    wyczyscPlik(nazwaPliku);
-
     for(itr; itr != koncowyIterator; ++itr)
-        zapiszAdresataDoPliku(*itr, nazwaPliku);
+        if(itr->id == idEdytowanegoAdresata) break;
+
+
+    fstream plikWejscia, plikWyjscia;
+    string wiersz, idAdresata;
+    string wierszZEdytowanymiDanymi = "3|2|Karol|Kaminski|234876453|karolek@gmail.com|Bogaty dom|";
+
+    const string NAZWA_PLIKU_TYMCZASOWEGO = "adresaci_tymczasowy.txt";
+
+    plikWejscia.open(nazwaPliku, ios::in);
+    plikWyjscia.open(NAZWA_PLIKU_TYMCZASOWEGO, ios::out);
+
+    if(plikWejscia.good())
+        while(!plikWejscia.eof()) {
+            getline(plikWejscia,wiersz);
+
+            if(wiersz.length() < 6) break;
+
+            istringstream strumienWiersza(wiersz);
+            getline(strumienWiersza, idAdresata, '|');
+
+            if(atoi(idAdresata.c_str()) == idEdytowanegoAdresata) {
+                plikWyjscia << itr->id << '|'
+                            << itr->idUzytkownika << '|'
+                            << itr->imie << '|'
+                            << itr->nazwisko << '|'
+                            << itr->numerTelefonu << '|'
+                            << itr->email << '|'
+                            << itr->adres << '|' << endl;
+
+            } else plikWyjscia << wiersz << endl;
+        }
+
+    plikWejscia.close();
+    plikWyjscia.close();
+
+    remove(nazwaPliku.c_str());
+    rename(NAZWA_PLIKU_TYMCZASOWEGO.c_str(), nazwaPliku.c_str());
 }
 
 void dodajAdresata(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika, string nazwaPliku) {
@@ -453,7 +489,7 @@ void usunAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
 
 
     adresaci.erase(iteratorUsuwanegoAdresata);
-    aktualizujPlikAdresatow(adresaci, nazwaPliku);
+    aktualizujPlikAdresatow(adresaci, idOsobyDoUsuniecia, nazwaPliku);
     wyswietlKomunikat("Adresat usuniety!");
 }
 
@@ -525,7 +561,7 @@ void edytujAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
         return;
     }
 
-    aktualizujPlikAdresatow(adresaci, nazwaPliku);
+    aktualizujPlikAdresatow(adresaci, idAdresataDoEdycji, nazwaPliku);
     wyswietlKomunikat("Dane pomyslnie zmienione!");
 }
 
@@ -554,8 +590,7 @@ int main() {
                 idZalogowanegoUzytkownika = logowanie(uzytkownicy);
                 if(idZalogowanegoUzytkownika > 0)
                     wczytajAdresatowZPliku(adresaci, idZalogowanegoUzytkownika, NAZWA_PLIKU_Z_ADRESATAMI);
-            }
-            else exit(0);
+            } else exit(0);
         } else {
 
             cout << "KSIAZKA ADRESOWA\n"
@@ -582,8 +617,7 @@ int main() {
             else if(wybor == '9') {
                 idZalogowanegoUzytkownika = 0;
                 adresaci.clear();
-            }
-            else wyswietlKomunikat("Opcja nie istnieje!");
+            } else wyswietlKomunikat("Opcja nie istnieje!");
         }
     }
     return 0;
