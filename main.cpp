@@ -392,7 +392,7 @@ void wyswietlAdresatowOImieniu(vector<Adresat> adresaci) {
         vector<Adresat>::iterator itr = adresaci.begin();
 
         for(itr; itr != koncowyIterator; ++itr) {
-            if((*itr).imie == imie)
+            if(itr->imie == imie)
                 wypiszAdresata(*itr);
         }
         cout << "\nKSIAZKA ADRESOWA\n"
@@ -425,7 +425,7 @@ void wyswietlAdresatowONazwisku(vector<Adresat> adresaci) {
         vector<Adresat>::iterator itr = adresaci.begin();
 
         for(itr; itr != koncowyIterator; ++itr) {
-            if((*itr).nazwisko == nazwisko)
+            if(itr->nazwisko == nazwisko)
                 wypiszAdresata(*itr);
         }
 
@@ -578,7 +578,6 @@ int main() {
     vector<Adresat> adresaci;
 
     wczytajUzytkownikowZPliku(uzytkownicy, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
-
 
     while(true) {
         system("cls");
