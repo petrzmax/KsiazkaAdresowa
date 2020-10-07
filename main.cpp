@@ -10,15 +10,6 @@
 
 using namespace std;
 
-/*
-
-Blad:
-id adresata max jest szukane w pamieci, a w pamieci nie ma teraz zaladowanych wszystkich uzytkownikow.
-dodawanie adresatow powoduje numerowanie ich od 1 dla kazdego uzytkownika
-- blad w funkcji dodaj nowego uzytkownika i znajdzNajwiekszeId
-
-*/
-
 #define CZAS_WYSWIETLANIA_WIADOMOSCI 1500
 
 struct Adresat {
@@ -36,15 +27,26 @@ void wyswietlKomunikat(string komunikat) {
     Sleep(CZAS_WYSWIETLANIA_WIADOMOSCI);
 }
 
-int znajdzNajwiekszeId(vector<Adresat> adresaci) {
+int znajdzNajwiekszeIdAdresataWPliku(vector<Adresat> adresaci, string nazwaPliku) {
     int najwiekszeId = 0;
+    string wiersz, sprawdzaneId;
+    fstream plik;
+    const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 6;
 
-    vector<Adresat>::iterator koncowyIterator = adresaci.end();
-    vector<Adresat>::iterator itr = adresaci.begin();
+    plik.open(nazwaPliku, ios::in);
 
-    for(itr; itr != koncowyIterator; ++itr)
-        if(itr->id > najwiekszeId)
-            najwiekszeId = itr->id;
+    if(plik.good())
+        while(!plik.eof()) {
+            getline(plik, wiersz);
+
+            if(wiersz.length() < MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA) break;
+
+            istringstream strumienWiersza(wiersz);
+            getline(strumienWiersza, sprawdzaneId, '|');
+
+            if(atoi(sprawdzaneId.c_str()) > najwiekszeId)
+                najwiekszeId = atoi(sprawdzaneId.c_str());
+        }
 
     return najwiekszeId;
 }
@@ -272,6 +274,7 @@ void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata
     string wiersz, idAdresata;
 
     const string NAZWA_PLIKU_TYMCZASOWEGO = "adresaci_tymczasowy.txt";
+    const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 6;
 
     vector<Adresat>::iterator koncowyIterator = adresaci.end();
     vector<Adresat>::iterator itr = adresaci.begin();
@@ -281,7 +284,6 @@ void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata
 
     if(itr == koncowyIterator) usuwanie = true;
 
-
     plikWejscia.open(nazwaPliku, ios::in);
     plikWyjscia.open(NAZWA_PLIKU_TYMCZASOWEGO, ios::out);
 
@@ -289,7 +291,7 @@ void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata
         while(!plikWejscia.eof()) {
             getline(plikWejscia,wiersz);
 
-            if(wiersz.length() < 6) break;
+            if(wiersz.length() < MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA) break;
 
             istringstream strumienWiersza(wiersz);
             getline(strumienWiersza, idAdresata, '|');
@@ -319,7 +321,7 @@ void dodajAdresata(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika, str
     system("cls");
 
     Adresat nowyAdresat;
-    nowyAdresat.id = znajdzNajwiekszeId(adresaci)+1;
+    nowyAdresat.id = znajdzNajwiekszeIdAdresataWPliku(adresaci, nazwaPliku)+1;
     nowyAdresat.idUzytkownika = idZalogowanegoUzytkownika;
 
     cout << "Imie: ";
