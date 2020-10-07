@@ -12,13 +12,19 @@ using namespace std;
 
 /*
 To do
-- Edycja danych - aktualizacja plikow
+- Edycja danych - aktualizuj plik adresatow
+
+Blad:
+id adresata max jest szukane w pamieci, a w pamieci nie ma teraz zaladowanych wszystkich uzytkownikow.
+dodawanie adresatow powoduje numerowanie ich od 1 dla kazdego uzytkownika
+- blad w funkcji dodaj nowego uzytkownika i znajdzNajwiekszeId
+
 */
 
 #define CZAS_WYSWIETLANIA_WIADOMOSCI 1500
 
 struct Adresat {
-    int id = 0, idWlascicielaWpisu = 0;;
+    int id = 0, idUzytkownika = 0;;
     string imie, nazwisko, numerTelefonu, email, adres;
 };
 
@@ -203,7 +209,7 @@ void wczytajUzytkownikowZPliku(vector<Uzytkownik> &uzytkownicy, string nazwaPlik
 
 void wczytajAdresatowZPliku(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika, string nazwaPliku) {
     fstream plik;
-    string wiersz, id, idWlascicielaWpisu, imie, nazwisko, numerTelefonu, email, adres;
+    string wiersz, id, idUzytkownika, imie, nazwisko, numerTelefonu, email, adres;
     const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 9;
 
     plik.open(nazwaPliku, ios::in);
@@ -219,7 +225,7 @@ void wczytajAdresatowZPliku(vector<Adresat> &adresaci, int idZalogowanegoUzytkow
             Adresat wczytywanyAdresat;
 
             getline(strumienWiersza,id, '|');
-            getline(strumienWiersza,idWlascicielaWpisu, '|');
+            getline(strumienWiersza,idUzytkownika, '|');
             getline(strumienWiersza,imie, '|');
             getline(strumienWiersza,nazwisko, '|');
             getline(strumienWiersza,numerTelefonu, '|');
@@ -227,14 +233,14 @@ void wczytajAdresatowZPliku(vector<Adresat> &adresaci, int idZalogowanegoUzytkow
             getline(strumienWiersza,adres, '|');
 
             wczytywanyAdresat.id = atoi(id.c_str());
-            wczytywanyAdresat.idWlascicielaWpisu = atoi(idWlascicielaWpisu.c_str());
+            wczytywanyAdresat.idUzytkownika = atoi(idUzytkownika.c_str());
             wczytywanyAdresat.imie = imie;
             wczytywanyAdresat.nazwisko = nazwisko;
             wczytywanyAdresat.numerTelefonu = numerTelefonu;
             wczytywanyAdresat.email = email;
             wczytywanyAdresat.adres = adres;
 
-            if(wczytywanyAdresat.idWlascicielaWpisu == idZalogowanegoUzytkownika)
+            if(wczytywanyAdresat.idUzytkownika == idZalogowanegoUzytkownika)
                 adresaci.push_back(wczytywanyAdresat);
         }
 
@@ -251,7 +257,7 @@ void zapiszAdresataDoPliku(Adresat adresat, string nazwaPliku) {
     plik.open(nazwaPliku,ios::out | ios::app);
 
     plik << adresat.id << '|'
-         << adresat.idWlascicielaWpisu << '|'
+         << adresat.idUzytkownika << '|'
          << adresat.imie << '|'
          << adresat.nazwisko << '|'
          << adresat.numerTelefonu << '|'
@@ -276,7 +282,7 @@ void dodajAdresata(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika, str
 
     Adresat nowyAdresat;
     nowyAdresat.id = znajdzNajwiekszeId(adresaci)+1;
-    nowyAdresat.idWlascicielaWpisu = idZalogowanegoUzytkownika;
+    nowyAdresat.idUzytkownika = idZalogowanegoUzytkownika;
 
     cout << "Imie: ";
     cin >> nowyAdresat.imie;
@@ -465,7 +471,7 @@ void edytujAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
     vector<Adresat>::iterator iteratorEdytowanegoAdresata = adresaci.begin();
 
     for(iteratorEdytowanegoAdresata; iteratorEdytowanegoAdresata != koncowyIterator; ++iteratorEdytowanegoAdresata)
-        if((*iteratorEdytowanegoAdresata).id == idAdresataDoEdycji) break;
+        if(iteratorEdytowanegoAdresata->id == idAdresataDoEdycji) break;
 
     if(iteratorEdytowanegoAdresata == koncowyIterator) {
         wyswietlKomunikat("Blad!\nAdresat o podanym id nie istnieje!");
@@ -489,7 +495,7 @@ void edytujAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
     switch(wybor) {
     case '1':
         cout << "Podaj nowe imie: ";
-        cin >> (*iteratorEdytowanegoAdresata).imie;
+        cin >> iteratorEdytowanegoAdresata->imie;
         break;
 
     case '2':
@@ -499,17 +505,17 @@ void edytujAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
 
     case '3':
         cout << "Podaj nowy numer telefonu: ";
-        cin >> (*iteratorEdytowanegoAdresata).numerTelefonu;
+        cin >> iteratorEdytowanegoAdresata->numerTelefonu;
         break;
 
     case '4':
         cout << "Podaj nowy email: ";
-        cin >> (*iteratorEdytowanegoAdresata).email;
+        cin >> iteratorEdytowanegoAdresata->email;
         break;
 
     case '5':
         cout << "Podaj nowy adres: ";
-        cin >> (*iteratorEdytowanegoAdresata).adres;
+        cin >> iteratorEdytowanegoAdresata->adres;
         break;
 
     case '6':
@@ -540,7 +546,7 @@ int main() {
         if(idZalogowanegoUzytkownika == 0) {
             cout << "1. Rejestracja\n"
                  << "2. Logowanie\n"
-                 << "9. Zakoncz program\n";
+                 << "9. Zamknij program\n";
             cin >> wybor;
 
             if(wybor == '1') stworzNowegoUzytkownika(uzytkownicy, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
