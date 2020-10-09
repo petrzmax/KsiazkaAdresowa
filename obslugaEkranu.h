@@ -4,10 +4,10 @@
 
 using namespace std;
 
-// USTAWIENIA
+//-----------USTAWIENIA-----------
 #define CZAS_WYSWIETLANIA_KOMUNIKATU 1500
 
-void wyswietlKomunikat(string komunikat);
+void wyswietlKomunikat(string);
 char pobierzZnak();
 char wybierzOpcjeZMenu();
 char wybierzOpcjeZMenuEdycji();
