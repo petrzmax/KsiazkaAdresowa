@@ -1,6 +1,9 @@
 #include <iostream>
 #include <windows.h>
 #include <iomanip>
+#include <vector>
+#include <conio.h>
+#include "struktury.h"
 
 using namespace std;
 
@@ -14,3 +17,7 @@ char wybierzOpcjeZMenuEdycji();
 char wybierzOpcjeZMenuLogowania();
 char wybierzOpcjeZMenuWyszukiwania();
 void wyswietlRubrykeOsob();
+void wypiszAdresata(Adresat);
+void wyswietlWszystkichAdresatow(vector<Adresat>);
+void wyswietlAdresatowOImieniu(vector<Adresat>);
+void wyswietlAdresatowONazwisku(vector<Adresat>);

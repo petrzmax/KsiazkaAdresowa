@@ -1,10 +1,7 @@
 #include <iostream>
-#include <conio.h>
-#include <fstream>
-#include <vector>
 #include <algorithm>
 #include <iterator>
-#include <sstream>
+#include "struktury.h"
 #include "obslugaEkranu.h"
 #include "obslugaPlikow.h"
 
@@ -13,21 +10,6 @@ using namespace std;
 //-----------USTAWIENIA-----------
 // LOGOWANIE
 #define ILOSC_PROB_LOGOWANIA 3
-
-// PLIKI
-#define NAZWA_PLIKU_Z_UZYTKOWNIKAMI "uzytkownicy.txt"
-#define NAZWA_PLIKU_Z_ADRESATAMI "adresaci.txt"
-#define NAZWA_PLIKU_TYMCZASOWEGO "adresaci_tymczasowy.txt"
-
-struct Adresat {
-    int id = 0, idUzytkownika = 0;;
-    string imie, nazwisko, numerTelefonu, email, adres;
-};
-
-struct Uzytkownik {
-    int idUzytkownika = 0;
-    string nazwaUzytkownika, haslo;
-};
 
 int znajdzNajwiekszeIdUzytkownika(vector<Uzytkownik> uzytkownicy) {
     int najwiekszeId = 0;
@@ -40,27 +22,6 @@ int znajdzNajwiekszeIdUzytkownika(vector<Uzytkownik> uzytkownicy) {
             najwiekszeId = itr->idUzytkownika;
 
     return najwiekszeId;
-}
-
-void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik) {
-    fstream plik;
-    plik.open(NAZWA_PLIKU_Z_UZYTKOWNIKAMI, ios::out | ios::app);
-
-    plik << uzytkownik.idUzytkownika << '|'
-         << uzytkownik.nazwaUzytkownika << '|'
-         << uzytkownik.haslo << endl;
-
-    plik.close();
-}
-
-void aktualizujPlikUzytkownikow(vector<Uzytkownik> uzytkownicy) {
-    vector<Uzytkownik>::iterator koncowyIterator = uzytkownicy.end();
-    vector<Uzytkownik>::iterator itr = uzytkownicy.begin();
-
-    wyczyscPlik(NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
-
-    for(itr; itr != koncowyIterator; ++itr)
-        zapiszUzytkownikaDoPliku(*itr);
 }
 
 void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy) {
@@ -142,151 +103,6 @@ void zmienHaslo(vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika) 
     wyswietlKomunikat("Haslo pomyslnie zmienione!");
 }
 
-void wczytajUzytkownikowZPliku(vector<Uzytkownik> &uzytkownicy) {
-    fstream plik;
-    string wiersz, idUzytkownika, nazwaUzytkownika, haslo;
-    const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 5;
-
-    plik.open(NAZWA_PLIKU_Z_UZYTKOWNIKAMI, ios::in);
-
-    if(plik.good()) {
-        while(!plik.eof()) {
-            getline(plik, wiersz, '\n');
-
-            if(wiersz.length() < MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA) break;
-
-            istringstream strumienWiersza(wiersz);
-
-            Uzytkownik wczytywanyUzytkownik;
-
-            getline(strumienWiersza,idUzytkownika, '|');
-            getline(strumienWiersza,nazwaUzytkownika, '|');
-            getline(strumienWiersza,haslo);
-
-            wczytywanyUzytkownik.idUzytkownika = atoi(idUzytkownika.c_str());
-            wczytywanyUzytkownik.nazwaUzytkownika = nazwaUzytkownika;
-            wczytywanyUzytkownik.haslo = haslo;
-
-            uzytkownicy.push_back(wczytywanyUzytkownik);
-        }
-
-        plik.close();
-        return;
-    } else {
-        plik.close();
-        return;
-    }
-}
-
-void wczytajAdresatowZPliku(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika) {
-    fstream plik;
-    string wiersz, id, idUzytkownika, imie, nazwisko, numerTelefonu, email, adres;
-    const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 9;
-
-    plik.open(NAZWA_PLIKU_Z_ADRESATAMI, ios::in);
-
-    if(plik.good()) {
-        while(!plik.eof()) {
-            getline(plik, wiersz, '\n');
-
-            if(wiersz.length() < 6) break;
-
-            istringstream strumienWiersza(wiersz);
-
-            Adresat wczytywanyAdresat;
-
-            getline(strumienWiersza,id, '|');
-            getline(strumienWiersza,idUzytkownika, '|');
-            getline(strumienWiersza,imie, '|');
-            getline(strumienWiersza,nazwisko, '|');
-            getline(strumienWiersza,numerTelefonu, '|');
-            getline(strumienWiersza,email, '|');
-            getline(strumienWiersza,adres, '|');
-
-            wczytywanyAdresat.id = atoi(id.c_str());
-            wczytywanyAdresat.idUzytkownika = atoi(idUzytkownika.c_str());
-            wczytywanyAdresat.imie = imie;
-            wczytywanyAdresat.nazwisko = nazwisko;
-            wczytywanyAdresat.numerTelefonu = numerTelefonu;
-            wczytywanyAdresat.email = email;
-            wczytywanyAdresat.adres = adres;
-
-            if(wczytywanyAdresat.idUzytkownika == idZalogowanegoUzytkownika)
-                adresaci.push_back(wczytywanyAdresat);
-        }
-
-        plik.close();
-        return;
-    } else {
-        plik.close();
-        return;
-    }
-}
-
-void zapiszAdresataDoPliku(Adresat adresat) {
-    fstream plik;
-    plik.open(NAZWA_PLIKU_Z_ADRESATAMI,ios::out | ios::app);
-
-    plik << adresat.id << '|'
-         << adresat.idUzytkownika << '|'
-         << adresat.imie << '|'
-         << adresat.nazwisko << '|'
-         << adresat.numerTelefonu << '|'
-         << adresat.email << '|'
-         << adresat.adres << '|' << endl;
-
-    plik.close();
-}
-
-void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata) {
-
-    fstream plikWejscia, plikWyjscia;
-    bool usuwanie = false;
-    string wiersz, idAdresata;
-
-    const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 6;
-
-    vector<Adresat>::iterator koncowyIterator = adresaci.end();
-    vector<Adresat>::iterator itr = adresaci.begin();
-
-    for(itr; itr != koncowyIterator; ++itr)
-        if(itr->id == idEdytowanegoAdresata) break;
-
-    if(itr == koncowyIterator) usuwanie = true;
-
-    plikWejscia.open(NAZWA_PLIKU_Z_ADRESATAMI, ios::in);
-    plikWyjscia.open(NAZWA_PLIKU_TYMCZASOWEGO, ios::out);
-
-    if(plikWejscia.good())
-        while(!plikWejscia.eof()) {
-            getline(plikWejscia,wiersz);
-
-            if(wiersz.length() < MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA) break;
-
-            istringstream strumienWiersza(wiersz);
-            getline(strumienWiersza, idAdresata, '|');
-
-            if(atoi(idAdresata.c_str()) == idEdytowanegoAdresata) {
-                if(usuwanie) continue;
-                else {
-                    plikWyjscia << itr->id << '|'
-                                << itr->idUzytkownika << '|'
-                                << itr->imie << '|'
-                                << itr->nazwisko << '|'
-                                << itr->numerTelefonu << '|'
-                                << itr->email << '|'
-                                << itr->adres << '|' << endl;
-                }
-            } else plikWyjscia << wiersz << endl;
-        }
-
-    plikWejscia.close();
-    plikWyjscia.close();
-
-    remove(NAZWA_PLIKU_Z_ADRESATAMI);
-    rename(NAZWA_PLIKU_TYMCZASOWEGO, NAZWA_PLIKU_Z_ADRESATAMI);
-}
-
 void dodajAdresata(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika) {
     system("cls");
 
@@ -312,91 +128,6 @@ void dodajAdresata(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika) {
     zapiszAdresataDoPliku(nowyAdresat);
 
     wyswietlKomunikat("Adresat dodany!");
-}
-
-void wypiszAdresata(Adresat adresat) {
-    cout << left << setw(5) << adresat.id
-         << left << setw(15) << adresat.imie
-         << left << setw(15) << adresat.nazwisko
-         << left << setw(15) << adresat.numerTelefonu
-         << left << setw(25) << adresat.email
-         << left << setw(25) << adresat.adres << endl;
-}
-
-void wyswietlWszystkichAdresatow(vector<Adresat> adresaci) {
-    system("cls");
-
-    wyswietlRubrykeOsob();
-    vector<Adresat>::iterator koncowyIterator = adresaci.end();
-    vector<Adresat>::iterator itr = adresaci.begin();
-
-    for(itr; itr != koncowyIterator; ++itr)
-        wypiszAdresata(*itr);
-
-    cout << "\nWcisnij dowolny przycisk aby powrocic do menu.";
-    getch();
-}
-
-void wyswietlAdresatowOImieniu(vector<Adresat> adresaci) {
-    string imie;
-    char wybor;
-
-    while(true) {
-        system("cls");
-
-        cout << "Podaj imie: ";
-        cin >> imie;
-
-        wyswietlRubrykeOsob();
-
-        vector<Adresat>::iterator koncowyIterator = adresaci.end();
-        vector<Adresat>::iterator itr = adresaci.begin();
-
-        for(itr; itr != koncowyIterator; ++itr) {
-            if(itr->imie == imie)
-                wypiszAdresata(*itr);
-        }
-
-        wybor = wybierzOpcjeZMenuWyszukiwania();
-
-        if(wybor == '1') continue;
-        else if(wybor == '2') break;
-        else {
-            wyswietlKomunikat("Opcja nie istnieje!");
-            break;
-        }
-    }
-}
-
-void wyswietlAdresatowONazwisku(vector<Adresat> adresaci) {
-    string nazwisko;
-    char wybor;
-
-    while(true) {
-        system("cls");
-
-        cout << "Podaj nazwisko: ";
-        cin >> nazwisko;
-
-        wyswietlRubrykeOsob();
-
-        vector<Adresat>::iterator koncowyIterator = adresaci.end();
-        vector<Adresat>::iterator itr = adresaci.begin();
-
-        for(itr; itr != koncowyIterator; ++itr) {
-            if(itr->nazwisko == nazwisko)
-                wypiszAdresata(*itr);
-        }
-
-        wybor = wybierzOpcjeZMenuWyszukiwania();
-
-        if(wybor == '1') continue;
-        else if(wybor == '2') break;
-        else {
-            wyswietlKomunikat("Opcja nie istnieje!");
-            break;
-        }
-    }
 }
 
 void usunAdresata(vector<Adresat> &adresaci) {

@@ -65,3 +65,87 @@ void wyswietlRubrykeOsob() {
          << left << setw(25) << "Adres" << endl;
 }
 
+void wypiszAdresata(Adresat adresat) {
+    cout << left << setw(5) << adresat.id
+         << left << setw(15) << adresat.imie
+         << left << setw(15) << adresat.nazwisko
+         << left << setw(15) << adresat.numerTelefonu
+         << left << setw(25) << adresat.email
+         << left << setw(25) << adresat.adres << endl;
+}
+
+void wyswietlWszystkichAdresatow(vector<Adresat> adresaci) {
+    system("cls");
+
+    wyswietlRubrykeOsob();
+    vector<Adresat>::iterator koncowyIterator = adresaci.end();
+    vector<Adresat>::iterator itr = adresaci.begin();
+
+    for(itr; itr != koncowyIterator; ++itr)
+        wypiszAdresata(*itr);
+
+    cout << "\nWcisnij dowolny przycisk aby powrocic do menu.";
+    getch();
+}
+
+void wyswietlAdresatowOImieniu(vector<Adresat> adresaci) {
+    string imie;
+    char wybor;
+
+    while(true) {
+        system("cls");
+
+        cout << "Podaj imie: ";
+        cin >> imie;
+
+        wyswietlRubrykeOsob();
+
+        vector<Adresat>::iterator koncowyIterator = adresaci.end();
+        vector<Adresat>::iterator itr = adresaci.begin();
+
+        for(itr; itr != koncowyIterator; ++itr) {
+            if(itr->imie == imie)
+                wypiszAdresata(*itr);
+        }
+
+        wybor = wybierzOpcjeZMenuWyszukiwania();
+
+        if(wybor == '1') continue;
+        else if(wybor == '2') break;
+        else {
+            wyswietlKomunikat("Opcja nie istnieje!");
+            break;
+        }
+    }
+}
+
+void wyswietlAdresatowONazwisku(vector<Adresat> adresaci) {
+    string nazwisko;
+    char wybor;
+
+    while(true) {
+        system("cls");
+
+        cout << "Podaj nazwisko: ";
+        cin >> nazwisko;
+
+        wyswietlRubrykeOsob();
+
+        vector<Adresat>::iterator koncowyIterator = adresaci.end();
+        vector<Adresat>::iterator itr = adresaci.begin();
+
+        for(itr; itr != koncowyIterator; ++itr) {
+            if(itr->nazwisko == nazwisko)
+                wypiszAdresata(*itr);
+        }
+
+        wybor = wybierzOpcjeZMenuWyszukiwania();
+
+        if(wybor == '1') continue;
+        else if(wybor == '2') break;
+        else {
+            wyswietlKomunikat("Opcja nie istnieje!");
+            break;
+        }
+    }
+}
