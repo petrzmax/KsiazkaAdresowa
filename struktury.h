@@ -4,7 +4,7 @@ using namespace std;
     #define STRUKTURY_H
 
     struct Adresat {
-        int id = 0, idUzytkownika;
+        int id, idUzytkownika;
         string imie, nazwisko, numerTelefonu, email, adres;
     };
 
