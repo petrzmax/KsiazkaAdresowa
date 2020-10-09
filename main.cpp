@@ -32,6 +32,50 @@ void wyswietlKomunikat(string komunikat) {
     Sleep(CZAS_WYSWIETLANIA_WIADOMOSCI);
 }
 
+char pobierzZnak() {
+    string znak;
+
+    while(true) {
+        cin >> znak;
+        if(znak.length() > 1)
+            cout << "To nie jest pojedynczy znak!\n";
+        else
+            return znak[0];
+    }
+}
+
+char wybierzOpcjeZMenu() {
+    cout << "KSIAZKA ADRESOWA\n"
+         << "1. Dodaj adresata\n"
+         << "2. Wyszukaj po imieniu\n"
+         << "3. Wyszukaj po nazwisku\n"
+         << "4. Wyswietl wszystkich adresatow\n"
+         << "5. Usun adresata\n"
+         << "6. Edytuj adresata\n"
+         << "7. Zmien haslo\n"
+         << "9. Wyloguj\n"
+         << "Twoj wybor: ";
+    return pobierzZnak();
+}
+
+char wybierzOpcjeZMenuEdycji() {
+    cout << "\nWybierz dane do edycji:\n"
+         << "1. Imie\n"
+         << "2. Nazwisko\n"
+         << "3. Numer telefonu\n"
+         << "4. Email\n"
+         << "5. Adres\n"
+         << "6. Powrot do menu\n";
+    return pobierzZnak();
+}
+
+char wybierzOpcjeZMenuLogowania() {
+    cout << "1. Rejestracja\n"
+         << "2. Logowanie\n"
+         << "9. Zamknij program\n";
+    return pobierzZnak();
+}
+
 int znajdzNajwiekszeIdAdresataWPliku(vector<Adresat> adresaci) {
     int najwiekszeId = 0;
     string wiersz, sprawdzaneId;
@@ -402,7 +446,7 @@ void wyswietlAdresatowOImieniu(vector<Adresat> adresaci) {
         cout << "\nKSIAZKA ADRESOWA\n"
              << "1. Wyszukaj kolejna osobe\n2. Powrot do menu\n";
 
-        cin >> wybor;
+        wybor = pobierzZnak();
 
         if(wybor == '1') continue;
         else if(wybor == '2') break;
@@ -436,7 +480,7 @@ void wyswietlAdresatowONazwisku(vector<Adresat> adresaci) {
         cout << "\nKSIAZKA ADRESOWA\n"
              << "1. Wyszukaj kolejna osobe\n2. Powrot do menu\n";
 
-        cin >> wybor;
+        wybor = pobierzZnak();
 
         if(wybor == '1') continue;
         else if(wybor == '2') break;
@@ -525,15 +569,7 @@ void edytujAdresata(vector<Adresat> &adresaci) {
     wyswietlRubrykeOsob();
     wypiszAdresata(*iteratorEdytowanegoAdresata);
 
-    cout << "\nWybierz dane do edycji:\n"
-         << "1. Imie\n"
-         << "2. Nazwisko\n"
-         << "3. Numer telefonu\n"
-         << "4. Email\n"
-         << "5. Adres\n"
-         << "6. Powrot do menu\n";
-
-    cin >> wybor;
+    wybor = wybierzOpcjeZMenuEdycji();
 
     switch(wybor) {
     case '1':
@@ -584,10 +620,8 @@ int main() {
     while(true) {
         system("cls");
         if(idZalogowanegoUzytkownika == 0) {
-            cout << "1. Rejestracja\n"
-                 << "2. Logowanie\n"
-                 << "9. Zamknij program\n";
-            cin >> wybor;
+
+            wybor = wybierzOpcjeZMenuLogowania();
 
             if(wybor == '1') stworzNowegoUzytkownika(uzytkownicy);
             else if(wybor == '2') {
@@ -597,19 +631,7 @@ int main() {
             } else exit(0);
         } else {
 
-            cout << "KSIAZKA ADRESOWA\n"
-                 << "1. Dodaj adresata\n"
-                 << "2. Wyszukaj po imieniu\n"
-                 << "3. Wyszukaj po nazwisku\n"
-                 << "4. Wyswietl wszystkich adresatow\n"
-                 << "5. Usun adresata\n"
-                 << "6. Edytuj adresata\n"
-                 << "7. Zmien haslo\n"
-                 << "9. Wyloguj\n"
-                 << "Twoj wybor: ";
-
-            cin.sync();
-            cin >> wybor;
+            wybor = wybierzOpcjeZMenu();
 
             if(wybor == '1') dodajAdresata(adresaci, idZalogowanegoUzytkownika);
             else if(wybor == '2') wyswietlAdresatowOImieniu(adresaci);
