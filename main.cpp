@@ -10,7 +10,12 @@
 
 using namespace std;
 
+// USTAWIENIA
+#define NAZWA_PLIKU_Z_UZYTKOWNIKAMI "uzytkownicy.txt"
+#define NAZWA_PLIKU_Z_ADRESATAMI "adresaci.txt"
+#define NAZWA_PLIKU_TYMCZASOWEGO "adresaci_tymczasowy.txt"
 #define CZAS_WYSWIETLANIA_WIADOMOSCI 1500
+
 
 struct Adresat {
     int id = 0, idUzytkownika = 0;;
@@ -27,13 +32,13 @@ void wyswietlKomunikat(string komunikat) {
     Sleep(CZAS_WYSWIETLANIA_WIADOMOSCI);
 }
 
-int znajdzNajwiekszeIdAdresataWPliku(vector<Adresat> adresaci, string nazwaPliku) {
+int znajdzNajwiekszeIdAdresataWPliku(vector<Adresat> adresaci) {
     int najwiekszeId = 0;
     string wiersz, sprawdzaneId;
     fstream plik;
     const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 6;
 
-    plik.open(nazwaPliku, ios::in);
+    plik.open(NAZWA_PLIKU_Z_ADRESATAMI, ios::in);
 
     if(plik.good())
         while(!plik.eof()) {
@@ -70,9 +75,9 @@ void wyczyscPlik(string nazwaPliku) {
     plik.close();
 }
 
-void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik, string nazwaPliku) {
+void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik) {
     fstream plik;
-    plik.open(nazwaPliku,ios::out | ios::app);
+    plik.open(NAZWA_PLIKU_Z_UZYTKOWNIKAMI, ios::out | ios::app);
 
     plik << uzytkownik.idUzytkownika << '|'
          << uzytkownik.nazwaUzytkownika << '|'
@@ -81,17 +86,17 @@ void zapiszUzytkownikaDoPliku(Uzytkownik uzytkownik, string nazwaPliku) {
     plik.close();
 }
 
-void aktualizujPlikUzytkownikow(vector<Uzytkownik> uzytkownicy, string nazwaPliku) {
+void aktualizujPlikUzytkownikow(vector<Uzytkownik> uzytkownicy) {
     vector<Uzytkownik>::iterator koncowyIterator = uzytkownicy.end();
     vector<Uzytkownik>::iterator itr = uzytkownicy.begin();
 
-    wyczyscPlik(nazwaPliku);
+    wyczyscPlik(NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
 
     for(itr; itr != koncowyIterator; ++itr)
-        zapiszUzytkownikaDoPliku(*itr, nazwaPliku);
+        zapiszUzytkownikaDoPliku(*itr);
 }
 
-void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy, string nazwaPliku) {
+void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy) {
     Uzytkownik nowyUzytkownik;
 
     system("cls");
@@ -115,7 +120,7 @@ void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy, string nazwaPliku)
     nowyUzytkownik.idUzytkownika = znajdzNajwiekszeIdUzytkownika(uzytkownicy) + 1;
 
     uzytkownicy.push_back(nowyUzytkownik);
-    zapiszUzytkownikaDoPliku(nowyUzytkownik, nazwaPliku);
+    zapiszUzytkownikaDoPliku(nowyUzytkownik);
 
     wyswietlKomunikat("Konto zalozone!");
 }
@@ -153,7 +158,7 @@ int logowanie(vector<Uzytkownik> &uzytkownicy) {
     return 0;
 }
 
-void zmienHaslo(vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika, string nazwaPliku) {
+void zmienHaslo(vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika) {
     string noweHaslo;
 
     system("cls");
@@ -167,16 +172,16 @@ void zmienHaslo(vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika, 
         if(iteratorUzytkownika->idUzytkownika == idZalogowanegoUzytkownika)
             iteratorUzytkownika->haslo = noweHaslo;
 
-    aktualizujPlikUzytkownikow(uzytkownicy, nazwaPliku);
+    aktualizujPlikUzytkownikow(uzytkownicy);
     wyswietlKomunikat("Haslo pomyslnie zmienione!");
 }
 
-void wczytajUzytkownikowZPliku(vector<Uzytkownik> &uzytkownicy, string nazwaPliku) {
+void wczytajUzytkownikowZPliku(vector<Uzytkownik> &uzytkownicy) {
     fstream plik;
     string wiersz, idUzytkownika, nazwaUzytkownika, haslo;
     const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 5;
 
-    plik.open(nazwaPliku, ios::in);
+    plik.open(NAZWA_PLIKU_Z_UZYTKOWNIKAMI, ios::in);
 
     if(plik.good()) {
         while(!plik.eof()) {
@@ -207,12 +212,12 @@ void wczytajUzytkownikowZPliku(vector<Uzytkownik> &uzytkownicy, string nazwaPlik
     }
 }
 
-void wczytajAdresatowZPliku(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika, string nazwaPliku) {
+void wczytajAdresatowZPliku(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika) {
     fstream plik;
     string wiersz, id, idUzytkownika, imie, nazwisko, numerTelefonu, email, adres;
     const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 9;
 
-    plik.open(nazwaPliku, ios::in);
+    plik.open(NAZWA_PLIKU_Z_ADRESATAMI, ios::in);
 
     if(plik.good()) {
         while(!plik.eof()) {
@@ -252,9 +257,9 @@ void wczytajAdresatowZPliku(vector<Adresat> &adresaci, int idZalogowanegoUzytkow
     }
 }
 
-void zapiszAdresataDoPliku(Adresat adresat, string nazwaPliku) {
+void zapiszAdresataDoPliku(Adresat adresat) {
     fstream plik;
-    plik.open(nazwaPliku,ios::out | ios::app);
+    plik.open(NAZWA_PLIKU_Z_ADRESATAMI,ios::out | ios::app);
 
     plik << adresat.id << '|'
          << adresat.idUzytkownika << '|'
@@ -267,13 +272,12 @@ void zapiszAdresataDoPliku(Adresat adresat, string nazwaPliku) {
     plik.close();
 }
 
-void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata, string nazwaPliku) {
+void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata) {
 
     fstream plikWejscia, plikWyjscia;
     bool usuwanie = false;
     string wiersz, idAdresata;
 
-    const string NAZWA_PLIKU_TYMCZASOWEGO = "adresaci_tymczasowy.txt";
     const int MINIMALNA_DLUGOSC_POPRAWNEGO_WIRSZA = 6;
 
     vector<Adresat>::iterator koncowyIterator = adresaci.end();
@@ -284,7 +288,7 @@ void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata
 
     if(itr == koncowyIterator) usuwanie = true;
 
-    plikWejscia.open(nazwaPliku, ios::in);
+    plikWejscia.open(NAZWA_PLIKU_Z_ADRESATAMI, ios::in);
     plikWyjscia.open(NAZWA_PLIKU_TYMCZASOWEGO, ios::out);
 
     if(plikWejscia.good())
@@ -313,15 +317,15 @@ void aktualizujPlikAdresatow(vector<Adresat> adresaci, int idEdytowanegoAdresata
     plikWejscia.close();
     plikWyjscia.close();
 
-    remove(nazwaPliku.c_str());
-    rename(NAZWA_PLIKU_TYMCZASOWEGO.c_str(), nazwaPliku.c_str());
+    remove(NAZWA_PLIKU_Z_ADRESATAMI);
+    rename(NAZWA_PLIKU_TYMCZASOWEGO, NAZWA_PLIKU_Z_ADRESATAMI);
 }
 
-void dodajAdresata(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika, string nazwaPliku) {
+void dodajAdresata(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika) {
     system("cls");
 
     Adresat nowyAdresat;
-    nowyAdresat.id = znajdzNajwiekszeIdAdresataWPliku(adresaci, nazwaPliku)+1;
+    nowyAdresat.id = znajdzNajwiekszeIdAdresataWPliku(adresaci)+1;
     nowyAdresat.idUzytkownika = idZalogowanegoUzytkownika;
 
     cout << "Imie: ";
@@ -339,7 +343,7 @@ void dodajAdresata(vector<Adresat> &adresaci, int idZalogowanegoUzytkownika, str
 
     adresaci.push_back(nowyAdresat);
 
-    zapiszAdresataDoPliku(nowyAdresat, nazwaPliku);
+    zapiszAdresataDoPliku(nowyAdresat);
 
     wyswietlKomunikat("Adresat dodany!");
 }
@@ -443,7 +447,7 @@ void wyswietlAdresatowONazwisku(vector<Adresat> adresaci) {
     }
 }
 
-void usunAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
+void usunAdresata(vector<Adresat> &adresaci) {
     int idOsobyDoUsuniecia;
     char wybor;
 
@@ -492,11 +496,11 @@ void usunAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
     } while (wybor != 't');
 
     adresaci.erase(iteratorUsuwanegoAdresata);
-    aktualizujPlikAdresatow(adresaci, idOsobyDoUsuniecia, nazwaPliku);
+    aktualizujPlikAdresatow(adresaci, idOsobyDoUsuniecia);
     wyswietlKomunikat("Adresat usuniety!");
 }
 
-void edytujAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
+void edytujAdresata(vector<Adresat> &adresaci) {
     char wybor;
     int idAdresataDoEdycji;
 
@@ -564,20 +568,18 @@ void edytujAdresata(vector<Adresat> &adresaci, string nazwaPliku) {
         return;
     }
 
-    aktualizujPlikAdresatow(adresaci, idAdresataDoEdycji, nazwaPliku);
+    aktualizujPlikAdresatow(adresaci, idAdresataDoEdycji);
     wyswietlKomunikat("Dane pomyslnie zmienione!");
 }
 
 int main() {
     char wybor;
     int idZalogowanegoUzytkownika = 0;
-    const string NAZWA_PLIKU_Z_UZYTKOWNIKAMI = "uzytkownicy.txt";
-    const string NAZWA_PLIKU_Z_ADRESATAMI = "adresaci.txt";
 
     vector<Uzytkownik> uzytkownicy;
     vector<Adresat> adresaci;
 
-    wczytajUzytkownikowZPliku(uzytkownicy, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
+    wczytajUzytkownikowZPliku(uzytkownicy);
 
     while(true) {
         system("cls");
@@ -587,11 +589,11 @@ int main() {
                  << "9. Zamknij program\n";
             cin >> wybor;
 
-            if(wybor == '1') stworzNowegoUzytkownika(uzytkownicy, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
+            if(wybor == '1') stworzNowegoUzytkownika(uzytkownicy);
             else if(wybor == '2') {
                 idZalogowanegoUzytkownika = logowanie(uzytkownicy);
                 if(idZalogowanegoUzytkownika > 0)
-                    wczytajAdresatowZPliku(adresaci, idZalogowanegoUzytkownika, NAZWA_PLIKU_Z_ADRESATAMI);
+                    wczytajAdresatowZPliku(adresaci, idZalogowanegoUzytkownika);
             } else exit(0);
         } else {
 
@@ -609,13 +611,13 @@ int main() {
             cin.sync();
             cin >> wybor;
 
-            if(wybor == '1') dodajAdresata(adresaci, idZalogowanegoUzytkownika, NAZWA_PLIKU_Z_ADRESATAMI);
+            if(wybor == '1') dodajAdresata(adresaci, idZalogowanegoUzytkownika);
             else if(wybor == '2') wyswietlAdresatowOImieniu(adresaci);
             else if(wybor == '3') wyswietlAdresatowONazwisku(adresaci);
             else if(wybor == '4') wyswietlWszystkichAdresatow(adresaci);
-            else if(wybor == '5') usunAdresata(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
-            else if(wybor == '6') edytujAdresata(adresaci, NAZWA_PLIKU_Z_ADRESATAMI);
-            else if(wybor == '7') zmienHaslo(uzytkownicy, idZalogowanegoUzytkownika, NAZWA_PLIKU_Z_UZYTKOWNIKAMI);
+            else if(wybor == '5') usunAdresata(adresaci);
+            else if(wybor == '6') edytujAdresata(adresaci);
+            else if(wybor == '7') zmienHaslo(uzytkownicy, idZalogowanegoUzytkownika);
             else if(wybor == '9') {
                 idZalogowanegoUzytkownika = 0;
                 adresaci.clear();
