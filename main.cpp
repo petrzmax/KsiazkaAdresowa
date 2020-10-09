@@ -1,21 +1,22 @@
 #include <iostream>
-#include <windows.h>
 #include <conio.h>
-#include <iomanip>
 #include <fstream>
 #include <vector>
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+#include "obslugaEkranu.h"
 
 using namespace std;
 
-// USTAWIENIA
+//-----------USTAWIENIA-----------
+// LOGOWANIE
+#define ILOSC_PROB_LOGOWANIA 3
+
+// PLIKI
 #define NAZWA_PLIKU_Z_UZYTKOWNIKAMI "uzytkownicy.txt"
 #define NAZWA_PLIKU_Z_ADRESATAMI "adresaci.txt"
 #define NAZWA_PLIKU_TYMCZASOWEGO "adresaci_tymczasowy.txt"
-#define CZAS_WYSWIETLANIA_WIADOMOSCI 1500
-
 
 struct Adresat {
     int id = 0, idUzytkownika = 0;;
@@ -26,55 +27,6 @@ struct Uzytkownik {
     int idUzytkownika = 0;
     string nazwaUzytkownika, haslo;
 };
-
-void wyswietlKomunikat(string komunikat) {
-    cout << komunikat;
-    Sleep(CZAS_WYSWIETLANIA_WIADOMOSCI);
-}
-
-char pobierzZnak() {
-    string znak;
-
-    while(true) {
-        cin >> znak;
-        if(znak.length() > 1)
-            cout << "To nie jest pojedynczy znak!\n";
-        else
-            return znak[0];
-    }
-}
-
-char wybierzOpcjeZMenu() {
-    cout << "KSIAZKA ADRESOWA\n"
-         << "1. Dodaj adresata\n"
-         << "2. Wyszukaj po imieniu\n"
-         << "3. Wyszukaj po nazwisku\n"
-         << "4. Wyswietl wszystkich adresatow\n"
-         << "5. Usun adresata\n"
-         << "6. Edytuj adresata\n"
-         << "7. Zmien haslo\n"
-         << "9. Wyloguj\n"
-         << "Twoj wybor: ";
-    return pobierzZnak();
-}
-
-char wybierzOpcjeZMenuEdycji() {
-    cout << "\nWybierz dane do edycji:\n"
-         << "1. Imie\n"
-         << "2. Nazwisko\n"
-         << "3. Numer telefonu\n"
-         << "4. Email\n"
-         << "5. Adres\n"
-         << "6. Powrot do menu\n";
-    return pobierzZnak();
-}
-
-char wybierzOpcjeZMenuLogowania() {
-    cout << "1. Rejestracja\n"
-         << "2. Logowanie\n"
-         << "9. Zamknij program\n";
-    return pobierzZnak();
-}
 
 int znajdzNajwiekszeIdAdresataWPliku(vector<Adresat> adresaci) {
     int najwiekszeId = 0;
@@ -171,7 +123,6 @@ void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy) {
 
 int logowanie(vector<Uzytkownik> &uzytkownicy) {
     Uzytkownik logowanyUzytkownik;
-    const int ILOSC_PROB = 3;
 
     system("cls");
 
@@ -183,8 +134,8 @@ int logowanie(vector<Uzytkownik> &uzytkownicy) {
 
     while(iteratorUzytkownika != iteratorKoncowy) {
         if(iteratorUzytkownika->nazwaUzytkownika == logowanyUzytkownik.nazwaUzytkownika) {
-            for(int i = 0; i < ILOSC_PROB; i++) {
-                cout << "Podaj haslo. Pozostalo prob " << ILOSC_PROB - i << ": ";
+            for(int i = 0; i < ILOSC_PROB_LOGOWANIA; i++) {
+                cout << "Podaj haslo. Pozostalo prob " << ILOSC_PROB_LOGOWANIA - i << ": ";
                 cin >> logowanyUzytkownik.haslo;
                 if(logowanyUzytkownik.haslo == iteratorUzytkownika->haslo) {
                     cout << "Zalogowales sie!";
@@ -401,15 +352,6 @@ void wypiszAdresata(Adresat adresat) {
          << left << setw(25) << adresat.adres << endl;
 }
 
-void wyswietlRubrykeOsob() {
-    cout << left << setw(5) << "id"
-         << left << setw(15) << "Imie"
-         << left << setw(15) << "Nazwisko"
-         << left << setw(15) << "Nr Telefonu"
-         << left << setw(25) << "Email"
-         << left << setw(25) << "Adres" << endl;
-}
-
 void wyswietlWszystkichAdresatow(vector<Adresat> adresaci) {
     system("cls");
 
@@ -443,10 +385,8 @@ void wyswietlAdresatowOImieniu(vector<Adresat> adresaci) {
             if(itr->imie == imie)
                 wypiszAdresata(*itr);
         }
-        cout << "\nKSIAZKA ADRESOWA\n"
-             << "1. Wyszukaj kolejna osobe\n2. Powrot do menu\n";
 
-        wybor = pobierzZnak();
+        wybor = wybierzOpcjeZMenuWyszukiwania();
 
         if(wybor == '1') continue;
         else if(wybor == '2') break;
@@ -477,10 +417,7 @@ void wyswietlAdresatowONazwisku(vector<Adresat> adresaci) {
                 wypiszAdresata(*itr);
         }
 
-        cout << "\nKSIAZKA ADRESOWA\n"
-             << "1. Wyszukaj kolejna osobe\n2. Powrot do menu\n";
-
-        wybor = pobierzZnak();
+        wybor = wybierzOpcjeZMenuWyszukiwania();
 
         if(wybor == '1') continue;
         else if(wybor == '2') break;
