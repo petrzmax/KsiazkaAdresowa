@@ -64,15 +64,11 @@ void wczytajUzytkownikowZPliku(vector<Uzytkownik> &uzytkownicy) {
 
             istringstream strumienWiersza(wiersz);
 
-            Uzytkownik wczytywanyUzytkownik;
-
             getline(strumienWiersza,idUzytkownika, '|');
             getline(strumienWiersza,nazwaUzytkownika, '|');
             getline(strumienWiersza,haslo);
 
-            wczytywanyUzytkownik.idUzytkownika = atoi(idUzytkownika.c_str());
-            wczytywanyUzytkownik.nazwaUzytkownika = nazwaUzytkownika;
-            wczytywanyUzytkownik.haslo = haslo;
+            Uzytkownik wczytywanyUzytkownik(atoi(idUzytkownika.c_str()), nazwaUzytkownika, haslo);
 
             uzytkownicy.push_back(wczytywanyUzytkownik);
         }

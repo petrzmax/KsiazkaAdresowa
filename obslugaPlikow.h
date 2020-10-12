@@ -2,6 +2,7 @@
 #include <vector>
 #include <sstream>
 #include "struktury.h"
+#include "Uzytkownik.h"
 
 using namespace std;
 

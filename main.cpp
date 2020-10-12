@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iterator>
 #include "struktury.h"
+#include "Uzytkownik.h"
 #include "obslugaEkranu.h"
 #include "obslugaPlikow.h"
 
@@ -12,40 +13,28 @@ using namespace std;
 #define ILOSC_PROB_LOGOWANIA 3
 
 int znajdzNajwiekszeIdUzytkownika(vector<Uzytkownik> uzytkownicy) {
-    int najwiekszeId = 0;
-
-    vector<Uzytkownik>::iterator koncowyIterator = uzytkownicy.end();
-    vector<Uzytkownik>::iterator itr = uzytkownicy.begin();
-
-    for(itr; itr != koncowyIterator; ++itr)
-        if(itr->idUzytkownika > najwiekszeId)
-            najwiekszeId = itr->idUzytkownika;
-
-    return najwiekszeId;
+    return uzytkownicy.back().pobierzId();
 }
 
 void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy) {
-    Uzytkownik nowyUzytkownik;
+    Uzytkownik nowyUzytkownik(znajdzNajwiekszeIdUzytkownika(uzytkownicy) + 1);
 
     system("cls");
-    cout << "Podaj nazwe uzytkownika: ";
-    cin >> nowyUzytkownik.nazwaUzytkownika;
+    nowyUzytkownik.ustawNazweUzytkownika();
 
     vector<Uzytkownik>::iterator iteratorUzytkownika = uzytkownicy.begin();
     vector<Uzytkownik>::iterator iteratorKoncowy = uzytkownicy.end();
 
     while(iteratorUzytkownika != iteratorKoncowy) {
-        if(iteratorUzytkownika->nazwaUzytkownika == nowyUzytkownik.nazwaUzytkownika) {
-            cout << "Taki uzytkownik juz istnieje! Wpisz inna nazwe uzytkownika: ";
-            cin >> nowyUzytkownik.nazwaUzytkownika;
+        if(iteratorUzytkownika->pobierzNazweUzytkownika() == nowyUzytkownik.pobierzNazweUzytkownika()) {
+            cout << "Taki uzytkownik juz istnieje! Wpisz inna nazwe uzytkownika.\n";
+            nowyUzytkownik.ustawNazweUzytkownika();
             iteratorUzytkownika = uzytkownicy.begin();
         } else
             ++iteratorUzytkownika;
     }
 
-    cout << "Podaj haslo: ";
-    cin >> nowyUzytkownik.haslo;
-    nowyUzytkownik.idUzytkownika = znajdzNajwiekszeIdUzytkownika(uzytkownicy) + 1;
+    nowyUzytkownik.ustawHaslo();
 
     uzytkownicy.push_back(nowyUzytkownik);
     zapiszUzytkownikaDoPliku(nowyUzytkownik);
@@ -55,23 +44,23 @@ void stworzNowegoUzytkownika(vector<Uzytkownik> &uzytkownicy) {
 
 int logowanie(vector<Uzytkownik> &uzytkownicy) {
     Uzytkownik logowanyUzytkownik;
+    string haslo;
 
     system("cls");
 
-    cout << "Podaj nazwe uzytkownika: ";
-    cin >> logowanyUzytkownik.nazwaUzytkownika;
+    logowanyUzytkownik.ustawNazweUzytkownika();
 
     vector<Uzytkownik>::iterator iteratorUzytkownika = uzytkownicy.begin();
     vector<Uzytkownik>::iterator iteratorKoncowy = uzytkownicy.end();
 
     while(iteratorUzytkownika != iteratorKoncowy) {
-        if(iteratorUzytkownika->nazwaUzytkownika == logowanyUzytkownik.nazwaUzytkownika) {
+        if(iteratorUzytkownika->pobierzNazweUzytkownika() == logowanyUzytkownik.pobierzNazweUzytkownika()) {
             for(int i = 0; i < ILOSC_PROB_LOGOWANIA; i++) {
                 cout << "Podaj haslo. Pozostalo prob " << ILOSC_PROB_LOGOWANIA - i << ": ";
-                cin >> logowanyUzytkownik.haslo;
-                if(logowanyUzytkownik.haslo == iteratorUzytkownika->haslo) {
-                    cout << "Zalogowales sie!";
-                    return iteratorUzytkownika->idUzytkownika;
+                cin >> haslo;
+                if(iteratorUzytkownika->zaloguj(haslo)) {
+                    wyswietlKomunikat("Zalogowales sie!");
+                    return iteratorUzytkownika->pobierzId();
                 }
             }
             cout << "Podales 3 razy bledne haslo. Program zablokowany na 3 sekundy!";
@@ -89,15 +78,14 @@ void zmienHaslo(vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika) 
     string noweHaslo;
 
     system("cls");
-    cout << "Podaj nowe haslo: ";
-    cin >> noweHaslo;
 
     vector<Uzytkownik>::iterator iteratorUzytkownika = uzytkownicy.begin();
     vector<Uzytkownik>::iterator iteratorKoncowy = uzytkownicy.end();
 
     for(iteratorUzytkownika; iteratorUzytkownika != iteratorKoncowy; ++iteratorUzytkownika)
-        if(iteratorUzytkownika->idUzytkownika == idZalogowanegoUzytkownika)
-            iteratorUzytkownika->haslo = noweHaslo;
+        if(iteratorUzytkownika->pobierzId() == idZalogowanegoUzytkownika){
+            iteratorUzytkownika->zmienHaslo();
+        }
 
     aktualizujPlikUzytkownikow(uzytkownicy);
     wyswietlKomunikat("Haslo pomyslnie zmienione!");
